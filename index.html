@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/minstyle.io@2.0.2/dist/css/minstyle.io.min.css">
+    <link href="https://unpkg.com/css.gg/icons/icons.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data style="min-height: 100vh; display:flex; flex-direction: column;">
+    <script src="./index.js"></script>
+    <div class="ms-menu ms-mb-2" x-data="login">
+        <nav class="ms-menu-link">
+            <template x-if="$store.logged_in">
+                <button class="ms-bg-primary" @click="$store.show.set(2)">
+                    <span x-show="$store.lan=='PL'">Notatki</span>
+                    <span x-show="$store.lan=='EN'">Notes</span>
+                </button>
+            </template>
+            <template x-if="!$store.logged_in">
+                <button class="ms-bg-secondary" @click="$store.show.set(1)">
+                    <span x-show="$store.lan=='PL'">Zaloguj</span>
+                    <span x-show="$store.lan=='EN'">Login</span>
+                </button>
+            </template>
+            <template x-if="!$store.logged_in">
+                <button class="ms-bg-secondary" @click="$store.show.set(0)">
+                    <span x-show="$store.lan=='PL'">Zarejestruj</span>
+                    <span x-show="$store.lan=='EN'">Register</span>
+                </button>
+            </template>
+            <template x-if="$store.logged_in">
+                <button class="ms-bg-action" type="button" @click="logout">
+                    <span x-show="$store.lan=='PL'">Wyloguj</span>
+                    <span x-show="$store.lan=='EN'">Logout</span>
+                </button>
+            </template>
+        </nav>
+    </div>
+    <div class="register" x-data="register" x-show="$store.show.show==0">
+        <form>
+            <div class="col-10 col-md-6 col-xxl-5 ms-div-center">
+                <div class="ms-form-group">
+                    <label for="Mail">Email</label>
+                    <input type="text" placeholder="Email" id="Mail" x-model="email" />
+                </div>
+                <div class="ms-form-group">
+                    <label for="Password">
+                        <span x-show="$store.lan=='PL'">Hasło</span>
+                        <span x-show="$store.lan=='EN'">Password</span>
+                    </label>
+                    <input type="password" placeholder="Password" id="Password" x-model="password" />
+                </div>
+                <div class="ms-form-group">
+                    <label for="Password">
+                        <span x-show="$store.lan=='PL'">Powtórz hasło</span>
+                        <span x-show="$store.lan=='EN'">Retype password</span>
+                    </label>
+                    <input type="password" placeholder="Password" id="Password" x-model="password_repeat" />
+                </div>
+                <button class="ms-btn ms-primary ms-fullwidth" type="button" @click='try_register'>
+                    <span x-show="$store.lan=='PL'">Zarejestruj</span>
+                    <span x-show="$store.lan=='EN'">Register</span>
+                </button>
+                <div class="ms-text-red ms-mt-1" x-text="error_message"></div>
+            </div>
+        </form>
+    </div>
+    <div class="login" x-data="login" x-show="$store.show.show==1">
+        <form>
+            <div class="col-10 col-md-6 col-xxl-5 ms-div-center">
+                <div class="ms-form-group">
+                    <label for="Mail"> Mail </label>
+                    <input type="text" placeholder="Mail" id="Mail" x-model="email" />
+                </div>
+                <div class="ms-form-group">
+                    <label for="Password">
+                        <span x-show="$store.lan=='PL'">Hasło</span>
+                        <span x-show="$store.lan=='EN'">Password</span>
+                    </label>
+                    <input type="password" placeholder="Password" id="Password" x-model="password" />
+                </div>
+                <button class="ms-btn ms-primary ms-fullwidth" type="button" @click="try_login">
+                    <span x-show="$store.lan=='PL'">Zaloguj</span>
+                    <span x-show="$store.lan=='EN'">Login</span>
+                </button>
+                <div class="ms-text-red ms-mt-1" x-text="error_message"></div>
+            </div>
+        </form>
+    </div>
+    <div class="notes" x-show="$store.show.show==2" x-data="notes" x-effect="$store.show.show && getNotes()">
+        <div class="ms-tab ms-fullwidth">
+            <ul>
+                <li><a href="#" @click="() => {tab=0}" :class="tab == 0 ? 'ms-active' : ''">
+                        <span x-show="$store.lan=='PL'">Notatki</span>
+                        <span x-show="$store.lan=='EN'">Your Notes</span>
+                    </a></li>
+                <li> <a href="#" @click="() => {tab=1}" :class="tab == 1 ? 'ms-active' : ''">
+                        <span x-show="$store.lan=='PL'">Dodaj</span>
+                        <span x-show="$store.lan=='EN'">Add note</span>
+                    </a></li>
+            </ul>
+        </div>
+        <div class="ms-mb-2"></div>
+        <div class="content_code col-10 col-md-6 col-xxl-5 ms-div-center">
+            <div x-show="tab==1">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="ms-form-group">
+                            <label for="title">
+                                <span x-show="$store.lan=='PL'">Tytuł</span>
+                                <span x-show="$store.lan=='EN'">Note title</span>
+                            </label>
+                            <input class="ms-large" type="text" placeholder="title" id="title" x-model="title" />
+                        </div>
+                        <div class="ms-form-group">
+                            <label for="Mail">
+                                <span x-show="$store.lan=='PL'">Treść</span>
+                                <span x-show="$store.lan=='EN'">Content</span>
+                            </label>
+                            <textarea type="text" placeholder="Mail" id="Mail" x-model="desc"> </textarea>
+                        </div>
+                    </div>
+                    <div><button class="ms-btn ms-primary ms-fullwidth" @click="addNote">
+                            <template x-if="adding">
+                                <div class="ms-loading ms-div-center"></div>
+                            </template>
+                            <template x-if="!adding">
+                                <span>
+                                    <span x-show="$store.lan=='PL'">Dodaj</span>
+                                    <span x-show="$store.lan=='EN'">Add note</span>
+                                </span>
+                            </template>
+                        </button>
+                    </div>
+                    <div class="ms-text-red ms-mt-1" x-text="error_message"></div>
+                </div>
+            </div>
+            <div x-show="tab==0">
+                <template x-if="loading">
+                    <div class="ms-loading ms-div-center"></div>
+                </template>
+                <template x-for="(note,index) in notes">
+                    <div class="ms-card ms-border" x-if="loading">
+                        <div class="ms-card-title">
+                            <template x-if="!notes_updates[index]">
+                                <h2 x-text="note[0]"></h2>
+                            </template>
+                            <template x-if="notes_updates[index]">
+                                <div class="ms-form-group">
+                                    <label for="title">
+                                        <span x-show="$store.lan=='PL'">Tytuł</span>
+                                        <span x-show="$store.lan=='EN'">Title</span>
+                                    </label>
+                                    <input class="ms-large" type="text" id="title" x-model="notes[index][0]" />
+                                </div>
+                            </template>
+                        </div>
+                        <div class="ms-card-content">
+                            <template x-if="!notes_updates[index]">
+                                <p x-text="notes_settings[index] ? note[1] : note[1].split(' ').slice(0, 50).join(' ')">
+                                </p>
+                            </template>
+                            <template x-if="notes_updates[index]">
+                                <div class="ms-form-group">
+                                    <label for="Mail">
+                                        <span x-show="$store.lan=='PL'">Treść</span>
+                                        <span x-show="$store.lan=='EN'">Contents</span>
+                                    </label>
+                                    <textarea type="text" id="Mail" x-model="notes[index][1]"> </textarea>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="ms-fullwidth">
+                            <span x-text="note[2]"></span>
+                            <div class="ms-btn-group ms-display-flex ms-flex-direction-row ms-flex-justify-right">
+                                <a class="ms-btn ms-action">
+                                    <template x-if="!notes_updates[index]"><span @click="notes_updates[index] = true">
+                                            <span x-show="$store.lan=='PL'">Zaktualizuj</span>
+                                            <span x-show="$store.lan=='EN'">Update</span>
+                                        </span></template>
+                                    <template x-if="notes_updates[index]">
+                                        <span>
+                                            <template x-if="updating">
+                                                <div class="ms-loading ms-div-center"></div>
+                                            </template>
+                                            <template x-if="!updating">
+                                                <span @click="updateNote(index)">
+                                                    <span x-show="$store.lan=='PL'">Zatwierdź</span>
+                                                    <span x-show="$store.lan=='EN'">Confirm</span>
+                                                </span>
+                                            </template>
+                                        </span>
+                                    </template>
+                                </a>
+                                <a class="ms-btn ms-action" x-show="notes_updates[index]"
+                                    @click="notes_updates[index]=false">
+                                    <span x-show="$store.lan=='PL'">Anuluj</span>
+                                    <span x-show="$store.lan=='EN'">Cancel</span>
+                                </a>
+                                <a class="ms-btn ms-secondary" x-show="note[1].split(' ').length > 50"
+                                    @click="notes_settings[index] = !notes_settings[index]"
+                                    x-text="notes_settings[index] ? 'Collapse' : 'Expand'"></a>
+                                <a class="ms-btn ms-primary" x-show="deleteindex==index" @click="deleteNote(index)">
+                                    <span x-show="$store.lan=='PL'">Zatwierdź</span>
+                                    <span x-show="$store.lan=='EN'">Confirm</span>
+                                </a>
+                                <span class="ms-btn ms-primary"
+                                    @click="deleteindex==index ? deleteindex = -1 : deleteindex = index">
+                                    <template x-if="deleteindex==index && $store.lan=='PL'">
+                                        <span>Anuluj</span>
+                                    </template>
+                                    <template x-if="deleteindex==index && $store.lan=='EN'">
+                                        <span>Cancel</span>
+                                    </template>
+                                    <template x-if="deleteindex!=index && $store.lan=='PL'">
+                                        <span>Usuń</span>
+                                    </template>
+                                    <template x-if="deleteindex!=index && $store.lan=='EN'">
+                                        <span>Delete</span>
+                                    </template>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <div class="ms-pagination">
+                    <ul x-show="!loading">
+                        <li>
+                            <span class="gg-arrow-left" x-show="page!=0" @click="page!=0?changePage(page-1):''"></span>
+                        </li>
+                        <template x-for="i in 5">
+                            <li><a x-text="i-2" @click="changePage(i-2-1)" x-show="i-2 > 0 && i-2<=totalPages"
+                                    :class="i-2-1==page ? 'ms-active' : ''"></a></li>
+                        </template>
+                        <li>
+                            <!-- <a :class="page+1>=totalPages ? 'ms-disabled' : ''" @click="page!=totalPages?changePage(page+1):''">Next</a> -->
+                            <span class="gg-arrow-right" x-show="page+1 != totalPages"
+                                @click="page!=totalPages ? changePage(page+1):''"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="ms-footer ms-small" style="margin-top: auto;" x-data="footer">
+        <div class="container">
+            <p>
+                <button class="ms-btn  ms-secondary" @click="toggleLanguage()"><span style="display: inline-block;"
+                        class="gg-globe-alt"></span> PL/EN</button>
+                <button class="ms-btn  ms-action" @click="toggleTheme()"><span style="display: inline-block;"
+                        class="gg-moon"></span>
+                    <span x-show="$store.lan=='PL'">Ciemny/Jasny</span>
+                    <span x-show="$store.lan=='EN'">Dark/Light</span>
+                </button>
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>

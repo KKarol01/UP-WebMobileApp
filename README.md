@@ -12,9 +12,9 @@
 - Ustawienia użytkownika
   - Wielojęzyczność: angielski i polski
   - tryby ciemny i jasny
+- Warstwa wspólnych serwisów
 
 ## Czego się nie udało zrobić
-- Warstwa wspólnych serwisów
 - Dostęp do zasobów sprzętowych
 - Opcje logowania i rejestracji przez google, facebook, etc.
 

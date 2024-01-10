@@ -203,9 +203,21 @@
                                     <span x-show="$store.lan=='PL'">Anuluj</span>
                                     <span x-show="$store.lan=='EN'">Cancel</span>
                                 </a>
-                                <a class="ms-btn ms-secondary" x-show="note[1].split(' ').length > 50"
-                                    @click="notes_settings[index] = !notes_settings[index]"
-                                    x-text="notes_settings[index] ? 'Collapse' : 'Expand'"></a>
+                                <span class="ms-btn ms-secondary" x-show="note[1].split(' ').length > 50"
+                                    @click="notes_settings[index] = !notes_settings[index]">
+                                    <template x-if="notes_settings[index]">
+                                        <span>
+                                            <span x-show="$store.lan=='PL'">Schowaj</span>
+                                            <span x-show="$store.lan=='EN'">Collapse</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="!notes_settings[index]">
+                                        <span>
+                                            <span x-show="$store.lan=='PL'">Rozwiń</span>
+                                            <span x-show="$store.lan=='EN'">Expand</span>
+                                        </span>
+                                    </template>
+                                </span>
                                 <a class="ms-btn ms-primary" x-show="deleteindex==index" @click="deleteNote(index)">
                                     <span x-show="$store.lan=='PL'">Zatwierdź</span>
                                     <span x-show="$store.lan=='EN'">Confirm</span>
